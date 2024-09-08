@@ -8,13 +8,14 @@ const StoreContextProvider = (props) => {
   const [cartItems, setCartItems] = useState({});
   const [token, setToken] = useState("");
   const url = "http://localhost:3000";
-
+  const[food_list , setFoodList] = useState([])
   const addToCart = async (itemId) => {
     const newCartItems = { ...cartItems, [itemId]: (cartItems[itemId] || 0) + 1 };
 
     try {
       setCartItems(newCartItems);
       if (token) {
+        console.log(itemId);
         await axios.post(
           url + "/api/cart/add",
           { itemId },
@@ -28,16 +29,18 @@ const StoreContextProvider = (props) => {
     }
   };
 
-  const removeFromCart = (itemId) => {
-    if (cartItems[itemId] > 0) {
-      setCartItems((prev) => {
-        const updatedCart = { ...prev };
-        updatedCart[itemId] = prev[itemId] - 1;
-        if (updatedCart[itemId] === 0) delete updatedCart[itemId];
-        return updatedCart;
-      });
-    }
-  };
+  const removeFromCart = async(itemId) => {
+   setCartItems((prev)=>({
+    ...prev,
+    [itemId]: (prev[itemId] || 0) - 1
+   }))
+   if (token) {
+    await axios.post(
+      url + "/api/cart/remove",
+      { itemId },
+      { headers: { token } }
+      );
+  }};
 
   const getTotalCartAmount = () => {
     return Object.keys(cartItems).reduce((total, itemId) => {
@@ -46,11 +49,25 @@ const StoreContextProvider = (props) => {
     }, 0);
   };
 
+  const fetchFoodList = async()=>{
+    const response = await axios.get(url+"/api/food/list")
+    setFoodList(response.data.data)
+  }
+const loadCartData = async(token)=>{
+  const response = await axios.post(url+"/api/cart/get",{},{headers:{token}})
+  setCartItems(response.data.cartData)
+}
+
   useEffect(() => {
-    const storedToken = localStorage.getItem("token");
-    if (storedToken) {
-      setToken(storedToken);
+    
+    async function loadData(){
+      await fetchFoodList();
+      if(localStorage.getItem("token")){
+        setToken(localStorage.getItem("token"))
+        await loadCartData(localStorage.getItem("token"))
+      }
     }
+    loadData();
   }, []);
 
   const contextValue = useMemo(() => ({
