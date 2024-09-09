@@ -60,7 +60,7 @@ app.use("/api/food", foodRouter);
 app.use("/images", express.static('uploads'));
 app.use("/api/cart", cartRouter);
 app.use("/api/order", orderRouter);
-app.use(paymentRoutes);
+// app.use(paymentRoutes);
 app.get("/", (req, res) => {
     res.send("API WORKING");
 });

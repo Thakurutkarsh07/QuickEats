@@ -79,7 +79,8 @@ const placeOrder = async (req, res) => {
             userId: req.body.userId,
             items: req.body.items,
             amount: req.body.amount,
-            address: req.body.address
+            address: req.body.address,
+            payment: req.body.payment
         });
 
         // Save the new order to the database
@@ -106,13 +107,14 @@ const placeOrder = async (req, res) => {
         res.status(200).json({
             success: true,
             msg: 'Order Created',
+            ord_id:newOrder._id,
             order_id: razorpayOrder.id,
             amount: totalAmount,
             key_id: process.env.RAZORPAY_KEY_ID,
             product_name: req.body.items.map(item => item.name).join(", "),
             description: 'Order payment for products',
-            name: "Sandeep Sharma",
-            email: "sandeep@gmail.com",
+            name: "Utkarsh Thakur",
+            email: "utkarsh@gmail.com",
             contact: "8567345632",
             success_url: `${frontend_url}/verify?success=true&orderId=${newOrder._id}`,
             cancel_url: `${frontend_url}/verify?success=false&orderId=${newOrder._id}`
@@ -122,6 +124,47 @@ const placeOrder = async (req, res) => {
         console.log(error);
         res.status(500).json({ success: false, message: "Error placing the order" });
     }
+}; 
+
+
+//verify
+import crypto from 'crypto'; // Import the crypto module
+
+const verifyOrder = async (req, res) => {
+    try {
+		const { razorpay_order_id, razorpay_payment_id, razorpay_signature, order_id  } =
+			req.body;
+		const sign = razorpay_order_id + "|" + razorpay_payment_id;
+		const expectedSign = crypto
+			.createHmac("sha256", process.env.RAZORPAY_SECRET)
+			.update(sign.toString())
+			.digest("hex");
+
+		if (razorpay_signature === expectedSign) {            
+			return res.status(200).json({success:true, message: "Payment verified successfully" });
+		} else {
+			return res.status(400).json({success:false, message: "Invalid signature sent!" });
+		}
+	} catch (error) {
+		res.status(500).json({ success:false ,message: "Internal Server Error!" });
+		console.log(error);
+	}
+
 };
 
-export { placeOrder };
+const verifiedOrder = async (req, res) => {
+    try {
+        const { order_id } = req.body; // Extract the order_id from the request body
+        
+        // Update the order in the database to set payment to true
+        await orderModel.findByIdAndUpdate(order_id, { payment: true });
+        
+        res.status(200).json({ success: true, message: "Order updated successfully" });
+    } catch (err) {
+        console.error("Error updating order:", err);
+        res.status(500).json({ success: false, message: "Internal Server Error" });
+    }
+};
+
+
+export { placeOrder,verifyOrder,verifiedOrder };

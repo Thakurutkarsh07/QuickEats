@@ -2,10 +2,11 @@ import React, { useContext, useState } from "react";
 import "./PlaceOrder.css";
 import { StoreContext } from "../../context/StoreContext";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const PlaceOrder = () => {
-  const { getTotalCartAmount, token, food_list, cartItems, url } =
-    useContext(StoreContext);
+  const navigate = useNavigate();
+  const { getTotalCartAmount, token, food_list, cartItems, url } = useContext(StoreContext);
 
   const [data, setData] = useState({
     firstName: "",
@@ -20,39 +21,38 @@ const PlaceOrder = () => {
   });
 
   const onChangeHandler = (event) => {
-    const name = event.target.name;
-    const value = event.target.value;
-    setData((data) => ({ ...data, [name]: value }));
+    const { name, value } = event.target;
+    setData(prevData => ({ ...prevData, [name]: value }));
   };
 
   const initializeRazorpayPayment = (orderData) => {
     const options = {
-      key: orderData.key_id, // Razorpay API Key ID from the backend
-      amount: orderData.amount, // Amount in paise
+      key: orderData.key_id,
+      amount: orderData.amount,
       currency: "INR",
-      name: "Food Delivery App", // Displayed on Razorpay Checkout
-      description: "Test Transaction",
-      order_id: orderData.order_id, // Order ID returned from backend
-      handler: async function (response) {
+      name: "Food Delivery App",
+      description: `Order #${orderData.order_id}`,
+      order_id: orderData.order_id,
+      handler: async (response) => {
         try {
-          const paymentVerificationResponse = await axios.post(
-            `${url}/api/order/verify`,
-            {
-              order_id: response.razorpay_order_id,
-              payment_id: response.razorpay_payment_id,
-              signature: response.razorpay_signature,
-            },
-            { headers: { token } }
-          );
-          if (paymentVerificationResponse.data.success) {
-            window.location.href = `${url}/order/success`;
-          } else {
-            alert("Payment verification failed");
-          }
-        } catch (error) {
-          console.error("Error verifying payment:", error);
-          alert("Payment verification failed");
+          const verificationData = {
+            razorpay_order_id: response.razorpay_order_id,
+            razorpay_payment_id: response.razorpay_payment_id,
+            razorpay_signature: response.razorpay_signature,
+            order_id: orderData.ord_id, // Include the order_id here
+          };
+					const verifyUrl = "http://localhost:3000/api/order/verify";
+					const { data } = await axios.post(verifyUrl, verificationData);
+					if(data.success){
+            await axios.post("http://localhost:3000/api/order/verified", { order_id: orderData.ord_id });
+            navigate("/#explore-menu");
         }
+        else{
+            navigate("/")
+        }
+				} catch (error) {
+					console.log(error);
+				}
       },
       prefill: {
         name: `${data.firstName} ${data.lastName}`,
@@ -71,107 +71,36 @@ const PlaceOrder = () => {
     razorpayCheckout.open();
   };
 
-  // const placeOrder = async (event) => {
-  //   event.preventDefault();
-  //   let orderItems = [];
-  //   food_list.forEach((item) => {
-  //     if (cartItems[item._id] > 0) {
-  //       let itemInfo = item;
-  //       itemInfo["quantity"] = cartItems[item._id];
-  //       orderItems.push(itemInfo);
-  //     }
-  //   });
-
-  //   let orderData = {
-  //     address: data,
-  //     items: orderItems,
-  //     amount: getTotalCartAmount() + 2, // Including delivery fee
-  //   };
-
-  //   try {
-  //     // Send order data to backend
-  //     let response = await axios.post(url + "/api/order/place", orderData, {
-  //       headers: { token },
-  //     });
-
-  //     if (response.data.success) {
-  //       // Initialize Razorpay payment
-  //       initializeRazorpayPayment(response.data);
-  //     } else {
-  //       alert(response.data);
-  //     }
-  //   } catch (error) {
-  //     console.error("Error placing order:", error);
-  //     alert("There was a problem placing your order.");
-  //   }
-  // };
   const placeOrder = async (event) => {
     event.preventDefault();
-    let orderItems = [];
-    
-    food_list.map((item) => {
-      if (cartItems[item._id] > 0) {
-        let itemInfo = item;
-        itemInfo["quantity"] = cartItems[item._id];
-        orderItems.push(itemInfo);
-      }
-    });
-  
-    let orderData = {
+    const orderItems = food_list
+      .filter(item => cartItems[item._id] > 0)
+      .map(item => ({
+        ...item,
+        quantity: cartItems[item._id],
+      }));
+
+    const orderData = {
       address: data,
       items: orderItems,
-      amount: getTotalCartAmount() + 2,
+      amount: getTotalCartAmount() + 2, // Including delivery fee
     };
-  
-    // Step 1: Create an order via Razorpay
-    let orderResponse = await axios.post(url + "/api/order/place", orderData, {
-      headers: { token },
-    });
-  
-    if (orderResponse.data.success) {
-      const { order_id, amount, key_id } = orderResponse.data;
-  
-      // Step 2: Initialize Razorpay
-      var options = {
-        key: key_id, // Razorpay key_id
-        amount: amount, // Amount to pay
-        currency: "INR",
-        name: "Food Delivery", // Your company/product name
-        description: "Order #1234",
-        order_id: order_id, // The Razorpay order ID
-        handler: async function (response) {
-          // Step 3: Send payment details to the backend for verification
-          let paymentVerificationResponse = await axios.post(
-            `${url}/api/order/verify`,
-            {
-              order_id: response.razorpay_order_id,
-              payment_id: response.razorpay_payment_id,
-              signature: response.razorpay_signature,
-            },
-            { headers: { token } }
-          );
-  
-          if (paymentVerificationResponse.data.success) {
-            // Payment verified successfully, redirect user
-            window.location.href = "/thank-you";
-          } else {
-            alert("Payment verification failed");
-          }
-        },
-        prefill: {
-          name: data.firstName + " " + data.lastName,
-          email: data.email,
-          contact: data.phone,
-        },
-      };
-  
-      var rzp1 = new window.Razorpay(options);
-      rzp1.open();
-    } else {
-      alert("Error creating order. Please try again.");
+
+    try {
+      const response = await axios.post(`${url}/api/order/place`, orderData, {
+        headers: { token },
+      });
+
+      if (response.data.success) {
+        initializeRazorpayPayment(response.data);
+      } else {
+        alert("Error creating order. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error placing order:", error);
+      alert("There was a problem placing your order. Please try again.");
     }
   };
-  
 
   return (
     <form onSubmit={placeOrder} className="place-order">
@@ -272,9 +201,7 @@ const PlaceOrder = () => {
             <hr />
             <div className="cart-total-details">
               <b>Total</b>
-              <b>
-                ${getTotalCartAmount() === 0 ? 0 : getTotalCartAmount() + 2}
-              </b>
+              <b>${getTotalCartAmount() === 0 ? 0 : getTotalCartAmount() + 2}</b>
             </div>
           </div>
           <button type="submit">PROCEED TO PAYMENT</button>
