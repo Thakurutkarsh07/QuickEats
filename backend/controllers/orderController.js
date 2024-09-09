@@ -59,56 +59,69 @@
 // }
  
 // export {placeOrder}
-
 import orderModel from "../models/orderModel.js";
 import userModel from "../models/userModel.js";
 import Razorpay from "razorpay";
-import 'dotenv/config';
 
-// Initialize Razorpay with key_id and key_secret
-const razorpay = new Razorpay({
-  key_id: process.env.RAZORPAY_KEY_ID,
-  key_secret: process.env.RAZORPAY_SECRET
+// Initialize Razorpay instance
+const razorpayInstance = new Razorpay({
+    key_id: process.env.RAZORPAY_KEY_ID,
+    key_secret: process.env.RAZORPAY_SECRET
 });
 
-export const placeOrder = async (req, res) => {
-  const frontend_url = "http://localhost:5173";
+// Placing user order for frontend
+const placeOrder = async (req, res) => {
+    const frontend_url = "http://localhost:5173";
+    
+    try {
+        // Create a new order in the database
+        const newOrder = new orderModel({
+            userId: req.body.userId,
+            items: req.body.items,
+            amount: req.body.amount,
+            address: req.body.address
+        });
 
-  try {
-    // Create new order in your database
-    const newOrder = new orderModel({
-      userId: req.body.userId,
-      items: req.body.items,
-      amount: req.body.amount,
-      address: req.body.address
-    });
+        // Save the new order to the database
+        await newOrder.save();
 
-    await newOrder.save();
-    await userModel.findByIdAndUpdate(req.body.userId, { cartData: {} });
+        // Clear the user's cart after placing the order
+        await userModel.findByIdAndUpdate(req.body.userId, { cartData: {} });
 
-    // Calculate the amount in paise (Razorpay uses INR in paise)
-    const amountInPaise = req.body.amount * 100;
+        // Calculate total order amount (in paise for Razorpay, so multiplying by 100)
+        const totalAmount = req.body.amount * 100; // Razorpay expects the amount in the smallest currency unit (paise)
 
-    // Create Razorpay order
-    const options = {
-      amount: amountInPaise, // amount in paise
-      currency: "INR",
-      receipt: newOrder._id.toString() // unique receipt ID
-    };
+        // Create options for Razorpay order
+        const options = {
+            amount: totalAmount,
+            currency: 'INR',
+            receipt: `order_rcptid_${newOrder._id}`,
+            payment_capture: 1 // Automatically capture the payment
+        };
 
-    const razorpayOrder = await razorpay.orders.create(options);
+        // Create a Razorpay order
+        const razorpayOrder = await razorpayInstance.orders.create(options);
 
-    // Send response back to frontend with necessary details
-    res.json({
-      success: true,
-      order_id: razorpayOrder.id, // Razorpay order ID
-      amount: amountInPaise,
-      currency: "INR",
-      key_id: process.env.RAZORPAY_KEY_ID, // Razorpay key_id for frontend use
-      orderId: newOrder._id // your internal order ID
-    });
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({ success: false, message: "Order placement failed" });
-  }
+        // Send response with necessary details for Razorpay checkout
+        res.status(200).json({
+            success: true,
+            msg: 'Order Created',
+            order_id: razorpayOrder.id,
+            amount: totalAmount,
+            key_id: process.env.RAZORPAY_KEY_ID,
+            product_name: req.body.items.map(item => item.name).join(", "),
+            description: 'Order payment for products',
+            name: "Sandeep Sharma",
+            email: "sandeep@gmail.com",
+            contact: "8567345632",
+            success_url: `${frontend_url}/verify?success=true&orderId=${newOrder._id}`,
+            cancel_url: `${frontend_url}/verify?success=false&orderId=${newOrder._id}`
+        });
+        
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ success: false, message: "Error placing the order" });
+    }
 };
+
+export { placeOrder };

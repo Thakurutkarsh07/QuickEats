@@ -42,6 +42,7 @@ import userRouter from "./routes/userRoute.js";
 import cartRouter from "./routes/cartRoute.js";
 import orderRouter from "./routes/orderRoute.js";
 
+import paymentRoutes from "./routes/paymentRoutes.js";
 // App configuration
 const app = express();
 const port = 3000; // Port is directly in the code
@@ -59,7 +60,7 @@ app.use("/api/food", foodRouter);
 app.use("/images", express.static('uploads'));
 app.use("/api/cart", cartRouter);
 app.use("/api/order", orderRouter);
-
+app.use(paymentRoutes);
 app.get("/", (req, res) => {
     res.send("API WORKING");
 });
