@@ -166,5 +166,37 @@ const verifiedOrder = async (req, res) => {
     }
 };
 
+//usersOrders for frontend
+const usersOrders = async (req, res) => {
+try{
+    const orders = await orderModel.find({userId:req.body.userId})
+    res.json({success:true,data:orders})
+}catch(err){
+    console.error(err);
+    
+    res.status(500).json({success:false,message:"Internal Server Error"})
+}
 
-export { placeOrder,verifyOrder,verifiedOrder };
+}
+//Listing orders for admin panel
+const listOrder = async(req,res)=>{
+    try{
+        const orders = await orderModel.find({})
+        res.json({success:true,data:orders})
+}catch(err){
+    res.json({success:false,message:"error"})
+}
+}
+
+//Updating status
+const updateStatus = async (req, res) => {
+    try {
+         await orderModel.findByIdAndUpdate(req.body.orderId, { status:req.body.status });
+        res.json({ success: true,message:"Status Updated" });
+        } catch (err) {
+            console.error(err);
+            res.status(500).json({ success: false, message: "Internal Server Error" });
+            }
+            };
+
+export { placeOrder,verifyOrder,verifiedOrder ,usersOrders,listOrder, updateStatus};
