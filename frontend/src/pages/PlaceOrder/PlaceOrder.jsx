@@ -43,9 +43,11 @@ const PlaceOrder = () => {
           };
 					const verifyUrl = "http://localhost:3000/api/order/verify";
 					const { data } = await axios.post(verifyUrl, verificationData);
+          // navigate("/verify")
 					if(data.success){
-            await axios.post("http://localhost:3000/api/order/verified", { order_id: orderData.ord_id });
-            navigate("/#explore-menu");
+            // await axios.post("http://localhost:3000/api/order/verified", { order_id: orderData.ord_id });
+            console.log(orderData.success_url);
+            navigate(`/verify?success=${true}&orderId=${orderData.ord_id}`);
         }
         else{
             navigate("/")
@@ -93,9 +95,11 @@ const PlaceOrder = () => {
 
       if (response.data.success) {
         initializeRazorpayPayment(response.data);
+        
       } else {
         alert("Error creating order. Please try again.");
       }
+
     } catch (error) {
       console.error("Error placing order:", error);
       alert("There was a problem placing your order. Please try again.");
