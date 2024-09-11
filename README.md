@@ -2,7 +2,7 @@
 Introduction
 The Full Stack Food Delivery Website is a modern web application designed to streamline the online food ordering process using the MERN stack (MongoDB, Express, React, Node.js) and Stripe for payment integration. The platform aims to provide an intuitive and efficient experience for users looking to order food and for administrators managing the restaurant and orders.
 Project Features
-1.	User Side Features:
+1.	User Side Features:</br>
 o	User Authentication: Secure registration and login using JWT (JSON Web Tokens) and bcrypt for password hashing.
 o	Restaurant and Menu Browsing: Users can view and filter restaurants and menus based on various criteria such as cuisine and delivery time.
 o	Order Placement: Users can select food items, proceed to checkout, and pay securely via Stripe, which supports credit and debit card transactions.
