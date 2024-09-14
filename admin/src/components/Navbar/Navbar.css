@@ -1,15 +1,17 @@
-.navbar{
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 8px 4%;
+/* Navbar container styling */
+.navbar {
+    display: flex;                  /* Use flexbox for layout */
+    justify-content: space-between; /* Distribute space between items */
+    align-items: center;            /* Align items vertically */
+    padding: 8px 4%;                /* Add padding on top/bottom and sides */
 }
 
-.navbar .logo{
-    width: max(10% 80px);
-
+/* Logo styling */
+.navbar .logo {
+    width: max(10%, 80px);          /* Set width to 10% of parent, with a minimum of 80px */
 }
 
-.navbar .profile{
-    width: 40px;
+/* Profile image styling */
+.navbar .profile {
+    width: 40px;                    /* Fixed width for profile image */
 }

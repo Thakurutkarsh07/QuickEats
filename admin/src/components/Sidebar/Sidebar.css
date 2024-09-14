@@ -1,33 +1,70 @@
-.sidebar{
-    width: 18%;
+/* Sidebar Styling */
+.sidebar {
+    width: 20%;
     min-height: 100vh;
-    border: 1.5px solid #a9a9a9;
-    border-top: 0;
-    font-size: max(1vw,10px);
-}
-.side-options{
-    padding-top: 50px;
-    padding-left: 20px;
+    background: #2c3e50; /* Dark background for a modern look */
+    border-right: 2px solid #34495e; /* Slightly lighter border for contrast */
+    padding: 20px;
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3); /* More prominent shadow */
 }
-.sidebar-option{
+
+/* Container for sidebar options */
+.side-options {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+/* Individual sidebar option styling */
+.sidebar-option {
     display: flex;
     align-items: center;
-    gap: 12px;
-    border: 1px solid #a9a9a9;
-    border-right: 0;
-    padding: 8px 10px;
-    border-radius: 3px 0px 0px 3px;
-    cursor: pointer;
+    gap: 15px;
+    background: #34495e; /* Slightly lighter background */
+    border-radius: 12px; /* Rounded corners for a sleek look */
+    padding: 12px 20px; /* Ample padding for a comfortable click area */
+    color: #ecf0f1; /* Light text color for contrast */
+    text-decoration: none; /* Remove underline from links */
+    transition: background-color 0.3s, transform 0.3s; /* Smooth transitions */
 }
-.sidebar-option.active{
-    background-color: rgb(235, 174, 174);
-    border-color: tomato;
+
+/* Active state styling for sidebar options */
+.sidebar-option.active {
+    background-color: #2980b9; /* Bright blue background for active state */
+    border: 2px solid #1f618d; /* Darker blue border for active state */
+    color: #fff; /* White text color for active state */
+    transform: scale(1.02); /* Slight zoom effect */
 }
-@media (max-width:900px) {
-    .sidebar-option p{
-        display: none;
+
+/* Hover effect for sidebar options */
+.sidebar-option:hover {
+    background-color: #1abc9c; /* Teal background on hover */
+    border: 2px solid #16a085; /* Darker teal border on hover */
+    color: #fff; /* White text color on hover */
+    transform: scale(1.02); /* Slight zoom effect on hover */
+}
+
+/* Responsive design adjustments */
+@media (max-width: 900px) {
+    .sidebar {
+        width: 100%; /* Full width on small screens */
+        padding: 10px;
+        border-right: none; /* Remove border on small screens */
+    }
+
+    .sidebar-option {
+        justify-content: center; /* Center-align items on small screens */
+        padding: 10px; /* Adjust padding */
+    }
+
+    .sidebar-option p {
+        display: none; /* Hide text on smaller screens */
+    }
+
+    .sidebar-option img {
+        width: 24px; /* Smaller icon size on small screens */
     }
 }
