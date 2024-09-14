@@ -1,16 +1,22 @@
-import React from 'react'
-import './Header.css'
+import React from "react";
+import "./Header.css";
+import { useNavigate } from "react-router-dom";
 
 const Header = () => {
-  return (
-    <div className='header' >
-        <div className="header-contents">
-            <h2>Order your favourite food here</h2>
-            <p>Choose from a diverse menu featuring a delectabe array of dishes crafted with the finest ingredients across the globe.</p>
-            <button>View Menu</button>
-        </div>
-    </div>
-  )
-}
+  const navigate = useNavigate(); // Define navigate
 
-export default Header
+  return (
+    <div className="header">
+      <div className="header-contents">
+        <h2>Savor the Speed of Flavor!</h2>
+        <p>
+          From savory to sweet, our offerings cater to every palate. Experience culinary excellence with every bite, prepared with care and expertise.
+        </p>
+        
+        <button onClick={() => navigate("/menu")}>View Menu</button>
+      </div>
+    </div>
+  );
+};
+
+export default Header;
