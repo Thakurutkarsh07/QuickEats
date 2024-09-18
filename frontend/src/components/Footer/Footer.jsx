@@ -28,13 +28,13 @@ const Footer = () => {
                 <h2>GET IN TOUCH</h2>
                 <ul>
                     <li>+31-485-485-584</li>
-                    <li>contact@tomato.com</li>
+                    <li>contact@QuickEats.com</li>
                 </ul>
             </div>
         </div>
         <hr />
         <p className="footer-copyright">
-            Copyright 2024 Tomato.com - All Right Reserved.
+            Copyright 2024 QuickEats.com - All Right Reserved.
         </p>
     </div>
   )

@@ -62,7 +62,7 @@ const List = ({ url }) => {
             </div>
             <div className="cell">{item.name}</div>
             <div className="cell">{item.category}</div>
-            <div className="cell">${item.price}</div>
+            <div className="cell">₹{item.price}</div>
             <div className="cell">
               <span onClick={() => removeFood(item._id)} className='cursor'>X</span>
             </div>

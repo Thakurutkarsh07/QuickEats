@@ -47,7 +47,7 @@ const Orders = ({ url }) => {
     <div className='order add'>
       <h3>Order Page</h3>
       <div className='order-list'>
-        {orders.map((order, index) => (
+        {orders.slice().reverse().map((order, index) => (
           <div key={index} className='order-item'>
             <img src={assets.parcel_icon} alt="" />
             <div className='order-item-details'>
@@ -72,7 +72,7 @@ const Orders = ({ url }) => {
                 <p>Item: {order.items.length}</p>
               </div>
               <div className='amount'>
-                <p>${order.amount}</p>
+                <p>₹{order.amount}</p>
               </div>
               <select onChange={(e) => statusHandler(e, order._id)} value={order.status}>
                 <option value="Food Processing">Food Processing</option>
