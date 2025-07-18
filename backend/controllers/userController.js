@@ -31,7 +31,11 @@ const loginUser = async (req, res) => {
 
 // Create Token
 const createToken = (id) => {
-  return jwt.sign({ id }, process.env.SECRET_KEY, { expiresIn: "2d" });
+  const jwtSecret = process.env.JWT_SECRET;
+  if (!jwtSecret) {
+    throw new Error('JWT_SECRET environment variable is not defined');
+  }
+  return jwt.sign({ id }, jwtSecret, { expiresIn: "7d" }); // Extended to 7 days for better UX
 };
 
 // Register user
